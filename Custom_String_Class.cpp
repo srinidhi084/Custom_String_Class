@@ -5,7 +5,7 @@ using namespace std;
 class String {
     char *str;
 
-    // to find length
+    //  to find string length
     static int getLen(const char* s) {
         int i = 0;
         while (s && s[i] != '\0') i++;
@@ -13,6 +13,8 @@ class String {
     }
 
 public:
+    
+
     // Default Constructor  
     String() {  
         str = new char[1];  
@@ -33,7 +35,7 @@ public:
         }
     }  
 
-    // Copy Constructor  
+    // Copy Constructor (Deep Copy)
     String(const String &s) {  
         int len = getLen(s.str);  
         str = new char[len + 1];  
@@ -46,6 +48,8 @@ public:
     ~String() {  
         delete[] str;  
     }  
+
+    /
 
     void setData() {  
         char tempArr[1024];
@@ -64,7 +68,7 @@ public:
         cout << str << endl;  
     }  
 
-    // Assignment Operator  
+    // Assignment Operator (Deep Copy)
     String& operator=(const String &s) {  
         if (this == &s) return *this; // Self-assignment check
 
@@ -94,7 +98,16 @@ public:
         return res;  
     }
 
-    // == Operator
+    // Subscript Operator []
+    char& operator[](int index) {
+        return str[index];
+    }
+
+    const char& operator[](int index) const {
+        return str[index];
+    }
+
+    // Equality Operators
     int operator==(const String &s) const {
         int i = 0;
         while (str[i] != '\0' && s.str[i] != '\0') {  
@@ -104,16 +117,36 @@ public:
         return str[i] == s.str[i];
     }
 
-    // != Operator
     int operator!=(const String &s) const {
         return !(*this == s);
     }
 
-    // Friend Stream Operators  
+    // Relational Operators
+    bool operator<(const String &s) const {
+        int i = 0;
+        while (str[i] != '\0' && s.str[i] != '\0') {
+            if (str[i] != s.str[i]) return str[i] < s.str[i];
+            i++;
+        }
+        return str[i] < s.str[i];
+    }
+
+    bool operator>(const String &s) const {
+        return s < *this;
+    }
+
+    bool operator<=(const String &s) const {
+        return !(*this > s);
+    }
+
+    bool operator>=(const String &s) const {
+        return !(*this < s);
+    }
+
+    
     friend ostream& operator<<(ostream&, const String&);  
     friend istream& operator>>(istream&, String&);  
 
-    // Friend String Functions  
     friend void strcpy(String&, const String&);  
     friend void strncpy(String&, const String&, int);  
     friend int strcmp(const String&, const String&);  
@@ -129,6 +162,8 @@ public:
     friend int strlen(const String&);
 };
 
+
+
 // string copy
 void strcpy(String &s1, const String &s2) {
     delete[] s1.str;
@@ -139,7 +174,7 @@ void strcpy(String &s1, const String &s2) {
     }
 }
 
-// stringncopy
+// string n copy
 void strncpy(String &s1, const String &s2, int n) {
     delete[] s1.str;
     s1.str = new char[n + 1];
@@ -264,11 +299,13 @@ int strlen(const String &s) {
     return String::getLen(s.str);
 }
 
+// Stream Output Operator <<
 ostream& operator<<(ostream &out, const String &s) {
     out << s.str;
     return out;
 }
 
+// Stream Input Operator >>
 istream& operator>>(istream &in, String &s) {
     char tempArr[1024];
     in >> tempArr;
@@ -276,29 +313,26 @@ istream& operator>>(istream &in, String &s) {
     return in;
 }
 
+
+
 int main() {
     String s1, s2;
-    int ch, n, pos;
+    int ch, n, pos, index;
     char c;
 
     while (1) {  
-       cout<<**************   STRING CLASS IMPLEMENTATION   ****************\n;
-       cout<<”----------------------------------------------------------------”;
-        cout << "\n1.strcpy";  
-        cout << "\n2.strncpy";  
-        cout << "\n3.strcmp";  
-        cout << "\n4.strncmp";  
-        cout << "\n5.strcat";  
-        cout << "\n6.strncat";  
-        cout << "\n7.strrev";  
-        cout << "\n8.strupr";  
-        cout << "\n9.strlwr";  
-        cout << "\n10.strchr";  
-        cout << "\n11.strrchr";  
-        cout << "\n12.strstr";  
-        cout << "\n13.strlen";  
-        cout << "\n14.Exit";  
-         cout<<”------------------------------------------------------------------\n”;
+         
+        cout<<"\n******String Class Implementation*******";
+        cout << "\n----------------------------------------;
+        cout << "\n1.strcpy       2.strncpy";
+        cout << "\n3.strcmp       4.strncmp";  
+        cout << "\n5.strcat       6.strncat";
+        cout << "\n7.strrev       8.strupr";  
+        cout << "\n9.strlwr       10.strchr";
+        cout << "\n11.strrchr     12.strstr";  
+        cout << "\n13.strlen      14.Subscript[]";
+        cout << "\n15.Relational  16.Exit";  
+        cout << "\n-----------------------------------------";
 
         cout << "\nEnter Choice : ";  
         cin >> ch;  
@@ -309,7 +343,7 @@ int main() {
                 s1.setData();  
                 s2.setData();  
                 strcpy(s1, s2);  
-                s1.getData();  
+                cout << "Result s1: " << s1 << endl;  
                 break;  
 
             case 2:  
@@ -318,7 +352,7 @@ int main() {
                 cout << "Enter n : ";  
                 cin >> n;  
                 strncpy(s1, s2, n);  
-                s1.getData();  
+                cout << "Result s1: " << s1 << endl;  
                 break;  
 
             case 3:  
@@ -345,7 +379,7 @@ int main() {
                 s1.setData();  
                 s2.setData();  
                 strcat(s1, s2);  
-                s1.getData();  
+                cout << "Result s1: " << s1 << endl;  
                 break;  
 
             case 6:  
@@ -354,33 +388,34 @@ int main() {
                 cout << "Enter n : ";  
                 cin >> n;  
                 strncat(s1, s2, n);  
-                s1.getData();  
+                cout << "Result s1: " << s1 << endl;  
                 break;  
 
             case 7:  
                 s1.setData();  
                 strrev(s1);  
-                s1.getData();  
+                cout << "Reversed: " << s1 << endl;  
                 break;  
 
             case 8:  
                 s1.setData();  
                 strupr(s1);  
-                s1.getData();  
+                cout << "Uppercase: " << s1 << endl;  
                 break;  
 
             case 9:  
                 s1.setData();  
                 strlwr(s1);  
-                s1.getData();  
+                cout << "Lowercase: " << s1 << endl;  
                 break;  
 
             case 10:  
                 s1.setData();  
                 cout << "Enter Character : ";  
                 cin >> c;  
-                if (strchr(s1, c) != -1)  
-                    cout << "Found" << endl;  
+                pos = strchr(s1, c);
+                if (pos != -1)  
+                    cout << "Found at index " << pos << endl;  
                 else  
                     cout << "Not Found" << endl;  
                 break;  
@@ -391,18 +426,18 @@ int main() {
                 cin >> c;  
                 pos = strrchr(s1, c);
                 if (pos != -1)  
-                    cout << "present" << endl;  
+                    cout << "Last present at index " << pos << endl;  
                 else  
-                    cout << "not present" << endl;  
+                    cout << "Not present" << endl;  
                 break;  
 
             case 12:  
                 s1.setData();  
                 s2.setData();  
                 if (strstr(s1, s2))  
-                    cout << "Found" << endl;  
+                    cout << "Substring Found" << endl;  
                 else  
-                    cout << "Not Found" << endl;  
+                    cout << "Substring Not Found" << endl;  
                 break;  
 
             case 13:  
@@ -410,7 +445,29 @@ int main() {
                 cout << "Length = " << strlen(s1) << endl;  
                 break;  
 
-            case 14:  
+            case 14:  // Subscript Operator []
+                s1.setData();
+                cout << "Enter index to access: ";
+                cin >> index;
+                if (index >= 0 && index < strlen(s1)) {
+                    cout << "Character at s1[" << index << "] = " << s1[index] << endl;
+                } else {
+                    cout << "Index out of bounds!" << endl;
+                }
+                break;
+
+            case 15:  // Relational Operators (<, >, <=, >=, ==, !=)
+                s1.setData();
+                s2.setData();
+                cout << "s1 == s2 : " << (s1 == s2 ? "True" : "False") << endl;
+                cout << "s1 != s2 : " << (s1 != s2 ? "True" : "False") << endl;
+                cout << "s1 < s2  : " << (s1 < s2  ? "True" : "False") << endl;
+                cout << "s1 > s2  : " << (s1 > s2  ? "True" : "False") << endl;
+                cout << "s1 <= s2 : " << (s1 <= s2 ? "True" : "False") << endl;
+                cout << "s1 >= s2 : " << (s1 >= s2 ? "True" : "False") << endl;
+                break;
+
+            case 16:  
                 return 0;  
 
             default:  
