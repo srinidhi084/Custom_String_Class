@@ -1,12 +1,12 @@
-
 #include <iostream>
+#include <fstream>
 using namespace std;
 
 class String
 {
     char *str;
 
-    // Find string length
+    // Helper function to find length
     static int getLen(const char *s)
     {
         int i = 0;
@@ -20,19 +20,12 @@ public:
     // Default Constructor
     String()
     {
-        str = new char[1];
-        str[0] = '\0';
+       str=0;
     }
 
     // Parameterized Constructor
     String(const char *s)
     {
-        if (!s)
-        {
-            str = new char[1];
-            str[0] = '\0';
-            return;
-        }
 
         int len = getLen(s);
         str = new char[len + 1];
@@ -97,32 +90,7 @@ public:
         return *this;
     }
 
-    // + Operator
-    String operator+(const String &s) const
-    {
-        int len1 = getLen(str);
-        int len2 = getLen(s.str);
-
-        char *tempBuf = new char[len1 + len2 + 1];
-
-        int i = 0;
-
-        for (i = 0; i < len1; i++)
-            tempBuf[i] = str[i];
-
-        for (int j = 0; j < len2; j++)
-            tempBuf[i++] = s.str[j];
-
-        tempBuf[i] = '\0';
-
-        String res(tempBuf);
-
-        delete[] tempBuf;
-
-        return res;
-    }
-
-    // Subscript Operator
+    // Subscript Operators
     char& operator[](int index)
     {
         return str[index];
@@ -133,62 +101,76 @@ public:
         return str[index];
     }
 
-    // Equality Operator
-    int operator==(const String &s) const
+    // Binary + Operator
+    String operator+(const String &s) const
+    {
+        int len1 = getLen(str);
+        int len2 = getLen(s.str);
+
+        char *tempBuf = new char[len1 + len2 + 1];
+
+        int i = 0;
+        for (i = 0; i < len1; i++)
+            tempBuf[i] = str[i];
+
+        for (int j = 0; j < len2; j++)
+            tempBuf[i++] = s.str[j];
+
+        tempBuf[i] = '\0';
+
+        String res(tempBuf);
+        delete[] tempBuf;
+
+        return res;
+    }
+    // Relational Operators (All Return bool)
+    
+
+    bool operator==(const String &s) const
     {
         int i = 0;
-
         while (str[i] != '\0' && s.str[i] != '\0')
         {
             if (str[i] != s.str[i])
-                return 0;
-
+                return false;
             i++;
         }
-
         return str[i] == s.str[i];
     }
 
-    // Not Equal
-    int operator!=(const String &s) const
+    bool operator!=(const String &s) const
     {
         return !(*this == s);
     }
 
-    // Less Than
     bool operator<(const String &s) const
     {
         int i = 0;
-
         while (str[i] != '\0' && s.str[i] != '\0')
         {
             if (str[i] != s.str[i])
                 return str[i] < s.str[i];
-
             i++;
         }
-
         return str[i] < s.str[i];
     }
 
-    // Greater Than
     bool operator>(const String &s) const
     {
         return s < *this;
     }
 
-    // Less Than or Equal
     bool operator<=(const String &s) const
     {
         return !(*this > s);
     }
 
-    // Greater Than or Equal
     bool operator>=(const String &s) const
     {
         return !(*this < s);
     }
 
+    // Friend Declarations
     friend ostream& operator<<(ostream&, const String&);
     friend istream& operator>>(istream&, String&);
 
@@ -208,24 +190,60 @@ public:
 };
 
 
-// strcpy
+// Extraction Operator (cin >>) 
+istream& operator>>(istream &in, String &s)
+{
+    // 1. Open a temporary file
+    ofstream outFile("temp.txt");
+
+    char ch;
+    int count = 0;
+
+    // 2. Read data char by char from user and store in file, then count
+    while (in.get(ch) && ch != '\n')
+    {
+        outFile.put(ch);
+        count++;
+    }
+    outFile.close();
+
+    // 3. Allocate memory
+    delete[] s.str;
+    s.str = new char[count + 1];
+
+    // 4. Read data char by char from file & store in memory
+    ifstream inFile("temp.txt");
+    for (int i = 0; i < count; i++)
+    {
+        inFile.get(s.str[i]);
+    }
+    s.str[count] = '\0';
+    inFile.close();
+
+    return in;
+}
+
+// Insertion Operator (cout <<)
+ostream& operator<<(ostream &out, const String &s)
+{
+    out << s.str;
+    return out;
+}
+
+// Custom String Library Functions
 void strcpy(String &s1, const String &s2)
 {
     if (&s1 == &s2)
         return;
 
     delete[] s1.str;
-
     int len = String::getLen(s2.str);
-
     s1.str = new char[len + 1];
 
     for (int i = 0; i <= len; i++)
         s1.str[i] = s2.str[i];
 }
 
-
-// strncpy
 void strncpy(String &s1, const String &s2, int n)
 {
     if (n < 0)
@@ -239,46 +257,34 @@ void strncpy(String &s1, const String &s2, int n)
     }
 
     delete[] s1.str;
-
     s1.str = new char[n + 1];
 
     int i;
-
     for (i = 0; i < n && s2.str[i] != '\0'; i++)
         s1.str[i] = s2.str[i];
 
     s1.str[i] = '\0';
 }
 
-
-// strcmp
 int strcmp(const String &s1, const String &s2)
 {
     int i = 0;
-
     while (s1.str[i] != '\0' && s2.str[i] != '\0')
     {
         if (s1.str[i] != s2.str[i])
             return s1.str[i] - s2.str[i];
-
         i++;
     }
-
     return s1.str[i] - s2.str[i];
 }
 
-
-// strncmp
 int strncmp(const String &s1, const String &s2, int n)
 {
     if (n <= 0)
         return 0;
 
     int i;
-
-    for (i = 0; i < n &&
-         s1.str[i] != '\0' &&
-         s2.str[i] != '\0'; i++)
+    for (i = 0; i < n && s1.str[i] != '\0' && s2.str[i] != '\0'; i++)
     {
         if (s1.str[i] != s2.str[i])
             return s1.str[i] - s2.str[i];
@@ -290,8 +296,6 @@ int strncmp(const String &s1, const String &s2, int n)
     return s1.str[i] - s2.str[i];
 }
 
-
-// strcat
 void strcat(String &s1, const String &s2)
 {
     int len1 = String::getLen(s1.str);
@@ -300,7 +304,6 @@ void strcat(String &s1, const String &s2)
     char *newStr = new char[len1 + len2 + 1];
 
     int i = 0;
-
     for (i = 0; i < len1; i++)
         newStr[i] = s1.str[i];
 
@@ -310,12 +313,9 @@ void strcat(String &s1, const String &s2)
     newStr[i] = '\0';
 
     delete[] s1.str;
-
     s1.str = newStr;
 }
 
-
-// strncat
 void strncat(String &s1, const String &s2, int n)
 {
     if (n <= 0)
@@ -325,11 +325,9 @@ void strncat(String &s1, const String &s2, int n)
     int len2 = String::getLen(s2.str);
 
     int catLen = (n < len2) ? n : len2;
-
     char *newStr = new char[len1 + catLen + 1];
 
     int i = 0;
-
     for (i = 0; i < len1; i++)
         newStr[i] = s1.str[i];
 
@@ -339,28 +337,20 @@ void strncat(String &s1, const String &s2, int n)
     newStr[i] = '\0';
 
     delete[] s1.str;
-
     s1.str = newStr;
 }
 
-
-// strrev
 void strrev(String &s)
 {
     int len = String::getLen(s.str);
-
     for (int i = 0; i < len / 2; i++)
     {
         char temp = s.str[i];
-
         s.str[i] = s.str[len - 1 - i];
-
         s.str[len - 1 - i] = temp;
     }
 }
 
-
-// strupr
 void strupr(String &s)
 {
     for (int i = 0; s.str[i] != '\0'; i++)
@@ -370,8 +360,6 @@ void strupr(String &s)
     }
 }
 
-
-// strlwr
 void strlwr(String &s)
 {
     for (int i = 0; s.str[i] != '\0'; i++)
@@ -381,8 +369,6 @@ void strlwr(String &s)
     }
 }
 
-
-// strchr
 int strchr(const String &s, char ch)
 {
     for (int i = 0; s.str[i] != '\0'; i++)
@@ -390,87 +376,49 @@ int strchr(const String &s, char ch)
         if (s.str[i] == ch)
             return i;
     }
-
     return -1;
 }
 
-
-// strrchr
 int strrchr(const String &s, char ch)
 {
     int lastIdx = -1;
-
     for (int i = 0; s.str[i] != '\0'; i++)
     {
         if (s.str[i] == ch)
             lastIdx = i;
     }
-
     return lastIdx;
 }
 
-
-// strstr
 int strstr(const String &s1, const String &s2)
 {
-    // Empty string is considered found
     if (s2.str[0] == '\0')
         return 1;
 
     for (int i = 0; s1.str[i] != '\0'; i++)
     {
         int j = 0;
-
         while (s2.str[j] != '\0')
         {
             if (s1.str[i + j] != s2.str[j])
                 break;
-
             j++;
         }
-
         if (s2.str[j] == '\0')
             return 1;
     }
-
     return 0;
 }
 
-
-// strlen
 int strlen(const String &s)
 {
     return String::getLen(s.str);
 }
 
-
-// Output Operator
-ostream& operator<<(ostream &out, const String &s)
-{
-    out << s.str;
-
-    return out;
-}
-
-
-// Input Operator
-istream& operator>>(istream &in, String &s)
-{
-    char tempArr[1024];
-
-    in >> tempArr;
-
-    s = String(tempArr);
-
-    return in;
-}
-
-
-// Main
+// Menu-driven interface
 int main()
 {
     String s1, s2;
-
     int ch, n, pos, index;
     char c;
 
@@ -485,11 +433,17 @@ int main()
         cout << "\n9.strlwr       10.strchr";
         cout << "\n11.strrchr     12.strstr";
         cout << "\n13.strlen      14.Subscript[]";
-        cout << "\n15.Relational  16.Exit";
+        cout << "\n15.Relational  16.Extraction >>";
+        cout << "\n17.Insertion << 18.Exit";
         cout << "\n------------------------------------------";
 
         cout << "\nEnter Choice : ";
-        cin >> ch;
+        if (!(cin >> ch))
+        {
+            cin.clear();
+            while (cin.get() != '\n');
+            continue;
+        }
         cin.ignore();
 
         switch (ch)
@@ -497,204 +451,149 @@ int main()
             case 1:
                 s1.setData();
                 s2.setData();
-
                 strcpy(s1, s2);
-
                 cout << "Result s1: " << s1 << endl;
                 break;
-
 
             case 2:
                 s1.setData();
                 s2.setData();
-
                 cout << "Enter n : ";
                 cin >> n;
                 cin.ignore();
-
                 strncpy(s1, s2, n);
-
                 cout << "Result s1: " << s1 << endl;
                 break;
-
 
             case 3:
                 s1.setData();
                 s2.setData();
-
                 if (strcmp(s1, s2) == 0)
                     cout << "Equal" << endl;
                 else
                     cout << "Not Equal" << endl;
-
                 break;
-
 
             case 4:
                 s1.setData();
                 s2.setData();
-
                 cout << "Enter n : ";
                 cin >> n;
                 cin.ignore();
-
                 if (strncmp(s1, s2, n) == 0)
                     cout << "Equal" << endl;
                 else
                     cout << "Not Equal" << endl;
-
                 break;
-
 
             case 5:
                 s1.setData();
                 s2.setData();
-
                 strcat(s1, s2);
-
                 cout << "Result s1: " << s1 << endl;
                 break;
-
 
             case 6:
                 s1.setData();
                 s2.setData();
-
                 cout << "Enter n : ";
                 cin >> n;
                 cin.ignore();
-
                 strncat(s1, s2, n);
-
                 cout << "Result s1: " << s1 << endl;
                 break;
 
-
             case 7:
                 s1.setData();
-
                 strrev(s1);
-
                 cout << "Reversed: " << s1 << endl;
                 break;
 
-
             case 8:
                 s1.setData();
-
                 strupr(s1);
-
                 cout << "Uppercase: " << s1 << endl;
                 break;
 
-
             case 9:
                 s1.setData();
-
                 strlwr(s1);
-
                 cout << "Lowercase: " << s1 << endl;
                 break;
 
-
             case 10:
                 s1.setData();
-
                 cout << "Enter Character : ";
                 cin >> c;
                 cin.ignore();
-
                 pos = strchr(s1, c);
-
                 if (pos != -1)
                     cout << "Found at index " << pos << endl;
                 else
                     cout << "Not Found" << endl;
-
                 break;
-
 
             case 11:
                 s1.setData();
-
                 cout << "Enter Character : ";
                 cin >> c;
                 cin.ignore();
-
                 pos = strrchr(s1, c);
-
                 if (pos != -1)
                     cout << "Last present at index " << pos << endl;
                 else
                     cout << "Not present" << endl;
-
                 break;
-
 
             case 12:
                 s1.setData();
                 s2.setData();
-
                 if (strstr(s1, s2))
                     cout << "Substring Found" << endl;
                 else
                     cout << "Substring Not Found" << endl;
-
                 break;
-
 
             case 13:
                 s1.setData();
-
                 cout << "Length = " << strlen(s1) << endl;
-
                 break;
-
 
             case 14:
                 s1.setData();
-
                 cout << "Enter index to access: ";
                 cin >> index;
                 cin.ignore();
-
                 if (index >= 0 && index < strlen(s1))
-                    cout << "Character at s1[" << index << "] = "
-                         << s1[index] << endl;
+                    cout << "Character at s1[" << index << "] = " << s1[index] << endl;
                 else
                     cout << "Index out of bounds!" << endl;
-
                 break;
-
 
             case 15:
                 s1.setData();
                 s2.setData();
-
-                cout << "s1 == s2 : "
-                     << (s1 == s2 ? "True" : "False") << endl;
-
-                cout << "s1 != s2 : "
-                     << (s1 != s2 ? "True" : "False") << endl;
-
-                cout << "s1 < s2  : "
-                     << (s1 < s2 ? "True" : "False") << endl;
-
-                cout << "s1 > s2  : "
-                     << (s1 > s2 ? "True" : "False") << endl;
-
-                cout << "s1 <= s2 : "
-                     << (s1 <= s2 ? "True" : "False") << endl;
-
-                cout << "s1 >= s2 : "
-                     << (s1 >= s2 ? "True" : "False") << endl;
-
+                cout << boolalpha;
+                cout << "s1 == s2 : " << (s1 == s2) << endl;
+                cout << "s1 != s2 : " << (s1 != s2) << endl;
+                cout << "s1 < s2  : " << (s1 < s2) << endl;
+                cout << "s1 > s2  : " << (s1 > s2) << endl;
+                cout << "s1 <= s2 : " << (s1 <= s2) << endl;
+                cout << "s1 >= s2 : " << (s1 >= s2) << endl;
                 break;
 
-
             case 16:
-                return 0;
+                cout << "Enter String (using cin >> s1): ";
+                cin >> s1;
+                cout << "Stored successfully! temp.txt created." << endl;
+                break;
 
+            case 17:
+                cout << "Displaying s1 (using cout << s1): " << s1 << endl;
+                break;
+
+            case 18:
+                return 0;
 
             default:
                 cout << "Invalid Choice" << endl;
