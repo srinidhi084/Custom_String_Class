@@ -6,7 +6,7 @@ class String
 {
     char *str;
 
-    // Helper function to find length
+    //length
     static int getLen(const char *s)
     {
         int i = 0;
